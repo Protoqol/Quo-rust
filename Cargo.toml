@@ -1,0 +1,10 @@
+[package]
+name = "quo-rust"
+version = "0.1.0"
+edition = "2021"
+authors = ["Protoqol <open-source@protoqol.nl"]
+license = "GPL-3"
+
+[dependencies]
+ureq = { version = "3", features = ["socks-proxy", "charset", "json"] }
+serde = { version = "1", features = ["derive"] }
