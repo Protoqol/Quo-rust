@@ -15,7 +15,7 @@ Add `quo-rust` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-quo-rust = "0.1.0"
+quo-rust = "0.1.1"
 ```
 
 ### Usage
