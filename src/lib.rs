@@ -4,7 +4,6 @@ use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVar
 use std::fmt::Debug;
 use std::time::{SystemTime, UNIX_EPOCH};
 use ureq::config::Config;
-use ureq::tls::{TlsConfig, TlsProvider};
 
 /// This fn creates a QuoPayload. You might or might not question why this is a separate function: for testing.
 ///
@@ -77,12 +76,7 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
         let send_fn = move || {
             let quo_server = format!("{}:{}", env_host, env_port);
 
-            let mut config = Config::builder()
-                .tls_config(
-                    TlsConfig::builder()
-                        .provider(TlsProvider::NativeTls)
-                        .build(),
-                )
+            let config = Config::builder()
                 .user_agent("Quo-Rust")
                 .build();
 

@@ -14,7 +14,7 @@ exclude = [
 ]
 
 [dependencies]
-ureq = { version = "3", features = ["json", "native-tls"] }
+ureq = { version = "3", default-features = false, features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
