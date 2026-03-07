@@ -1,8 +1,9 @@
 mod types;
 
-#[cfg(target_family = "wasm")]
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 use js_sys::Date;
-#[cfg(not(target_family = "wasm"))]
+
+#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
@@ -35,13 +36,13 @@ fn quo_create_payload<T: Debug>(
     let file = file;
     let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project");
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
     let (time_epoch_ms, uid) = {
-        let now = js_sys::Date::now();
+        let now = Date::now();
         (now as i64, now.to_string())
     };
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
     let (time_epoch_ms, uid) = {
         let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         (
@@ -63,7 +64,6 @@ fn quo_create_payload<T: Debug>(
                 name: name.to_string(),
                 value: value.clone(),
                 mutable: is_mutable,
-                // @TODO Correctly detect const.
                 is_constant: name == name.to_uppercase(),
             },
         },
@@ -108,12 +108,12 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
             };
         };
 
-        #[cfg(all(target_arch = "wasm32", not(target_feature = "atomics")))]
+        #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
         {
             send_fn();
         }
 
-        #[cfg(not(all(target_arch = "wasm32", not(target_feature = "atomics"))))]
+        #[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
         {
             std::thread::spawn(send_fn);
         }
