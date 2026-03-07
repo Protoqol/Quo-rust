@@ -11,10 +11,10 @@ terminal or browser console.
 
 ### Installation
 
-Add `quo-rust` to your `Cargo.toml`:
+Add `quo-rust` to your `Cargo.toml` under `dev-dependencies`:
 
 ```toml
-[dependencies]
+[dev-dependencies]
 quo-rust = "0.1.1"
 ```
 
