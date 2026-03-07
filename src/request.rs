@@ -13,6 +13,8 @@ use ehttp::{fetch_async, Headers, Mode};
 use ureq::config::Config;
 
 /// Make a request to Quo.
+///
+/// Should not be used directly.
 #[doc(hidden)]
 pub fn make_request(target: &str, payload: QuoPayload) {
     let url = target.to_string();
