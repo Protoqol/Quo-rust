@@ -97,6 +97,7 @@ fn quo<T: Debug>(
     }
 }
 
+/// Use the `quo!()` macro and not this fn directly.
 #[cfg(debug_assertions)]
 #[doc(hidden)]
 pub fn __private_quo<T: Debug>(
@@ -126,8 +127,20 @@ macro_rules! quo {
         #[cfg(debug_assertions)]
         $(
             {
-                let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
-                $crate::__private_quo(&$var, stringify!($var), line!(), file!(), true, package_name);
+                let __quo_package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
+
+                #[cfg(target_family = "wasm")]
+                {
+                    let __quo_file_path = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+                    $crate::__private_quo(&$var, stringify!($var), line!(), &__quo_file_path, true, __quo_package_name);
+                }
+
+                #[cfg(not(target_family = "wasm"))]
+                {
+                    let __quo_path_buf = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(file!());
+                    let __quo_file_path = __quo_path_buf.to_str().unwrap_or(file!());
+                    $crate::__private_quo(&$var, stringify!($var), line!(), __quo_file_path, true, __quo_package_name);
+                }
             }
         )*
     }};
@@ -135,8 +148,20 @@ macro_rules! quo {
         #[cfg(debug_assertions)]
         $(
             {
-                let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
-                $crate::__private_quo(&$var, stringify!($var), line!(), file!(), false, package_name);
+                let __quo_package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
+
+                #[cfg(target_family = "wasm")]
+                {
+                    let __quo_file_path = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+                    $crate::__private_quo(&$var, stringify!($var), line!(), &__quo_file_path.to_owned(), false, __quo_package_name);
+                }
+
+                #[cfg(not(target_family = "wasm"))]
+                {
+                    let __quo_path_buf = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(file!());
+                    let __quo_file_path = __quo_path_buf.to_str().unwrap_or(file!());
+                    $crate::__private_quo(&$var, stringify!($var), line!(), __quo_file_path, false, __quo_package_name);
+                }
             }
         )*
     }};
