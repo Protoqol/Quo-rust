@@ -28,7 +28,7 @@ mod lib_tests {
     fn fn_test() {
         let fn_test_var = 1234;
 
-        let payload = quo_create_payload(&fn_test_var, "fn_test_var", line!(), file!(), false, "test");
+        let payload = quo_create_payload(fn_test_var, "fn_test_var", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "fn_test_var");
         assert_eq!(payload.meta.variable.value, "1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
@@ -42,7 +42,7 @@ mod lib_tests {
 
         quo!(VAR_I32, VAR_I32, VAR_I32);
 
-        let payload = quo_create_payload(&VAR_I32, "VAR_I32", line!(), file!(), false, "test");
+        let payload = quo_create_payload(VAR_I32, "VAR_I32", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "VAR_I32");
         assert_eq!(payload.meta.variable.value, "-1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
@@ -54,7 +54,7 @@ mod lib_tests {
     fn macro_i32_test() {
         let var_i32: i32 = -1234;
 
-        let payload = quo_create_payload(&var_i32, "var_i32", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_i32, "var_i32", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_i32");
         assert_eq!(payload.meta.variable.value, "-1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
@@ -66,7 +66,7 @@ mod lib_tests {
     fn macro_u32_test() {
         let var_u32: u32 = 1234;
 
-        let payload = quo_create_payload(&var_u32, "var_u32", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_u32, "var_u32", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_u32");
         assert_eq!(payload.meta.variable.value, "1234");
         assert_eq!(payload.meta.variable.var_type, "&u32");
@@ -78,7 +78,7 @@ mod lib_tests {
     fn macro_string_test() {
         let var_string: &str = "string";
 
-        let payload = quo_create_payload(&var_string, "var_string", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_string, "var_string", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_string");
         assert_eq!(payload.meta.variable.value, "\"string\"");
         assert_eq!(payload.meta.variable.var_type, "&&str");
@@ -90,7 +90,7 @@ mod lib_tests {
     fn macro_bool_test() {
         let var_bool: bool = true;
 
-        let payload = quo_create_payload(&var_bool, "var_bool", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_bool, "var_bool", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_bool");
         assert_eq!(payload.meta.variable.value, "true");
         assert_eq!(payload.meta.variable.var_type, "&bool");
@@ -108,7 +108,7 @@ mod lib_tests {
             23423,
         );
 
-        let payload = quo_create_payload(&var_tuple, "var_tuple", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_tuple, "var_tuple", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_tuple");
         assert_eq!(
             payload.meta.variable.value,
@@ -130,7 +130,7 @@ mod lib_tests {
             String::from("works"),
         ];
 
-        let payload = quo_create_payload(&var_array, "var_array", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_array, "var_array", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_array");
         assert_eq!(
             payload.meta.variable.value,
@@ -152,7 +152,7 @@ mod lib_tests {
             String::from("works"),
         ];
 
-        let payload = quo_create_payload(&var_vector, "var_vector", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_vector, "var_vector", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_vector");
         assert_eq!(
             payload.meta.variable.value,
@@ -169,7 +169,7 @@ mod lib_tests {
     #[test]
     fn macro_mut_test() {
         let mut var_mut = 1;
-        let payload1 = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true, "test");
+        let payload1 = quo_create_payload(var_mut, "var_mut", line!(), file!(), true, "test");
         assert_eq!(payload1.meta.variable.name, "var_mut");
         assert_eq!(payload1.meta.variable.value, "1");
         assert_eq!(payload1.meta.variable.var_type, "&i32");
@@ -177,7 +177,7 @@ mod lib_tests {
         assert!(!payload1.meta.variable.is_constant);
 
         var_mut = 2;
-        let payload2 = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true, "test");
+        let payload2 = quo_create_payload(var_mut, "var_mut", line!(), file!(), true, "test");
         assert_eq!(payload2.meta.variable.name, "var_mut");
         assert_eq!(payload2.meta.variable.value, "2");
         assert_eq!(payload2.meta.variable.var_type, "&i32");
@@ -188,7 +188,7 @@ mod lib_tests {
     #[test]
     fn macro_immut_test() {
         let var_immut = 1;
-        let payload = quo_create_payload(&var_immut, "var_immut", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_immut, "var_immut", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_immut");
         assert_eq!(payload.meta.variable.value, "1");
         assert_eq!(payload.meta.variable.var_type, "&i32");
@@ -214,7 +214,7 @@ mod lib_tests {
             d: true,
         };
 
-        let payload = quo_create_payload(&var_complex, "var_complex", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_complex, "var_complex", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_complex");
         assert_eq!(
             payload.meta.variable.var_type,
@@ -256,7 +256,7 @@ mod lib_tests {
             j: 10,
         };
 
-        let payload = quo_create_payload(&var_large, "var_large", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_large, "var_large", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_large");
         assert_eq!(
             payload.meta.variable.var_type,
@@ -272,7 +272,7 @@ mod lib_tests {
         let mut var_mut = 1;
         quo!(mut var_mut); 
 
-        let payload = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true, "test");
+        let payload = quo_create_payload(var_mut, "var_mut", line!(), file!(), true, "test");
         assert!(payload.meta.variable.mutable);
 
         var_mut = 2;
