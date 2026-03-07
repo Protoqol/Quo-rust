@@ -21,7 +21,7 @@ Add `quo` to your `Cargo.toml` under `dev-dependencies`:
 
 ```toml
 [dev-dependencies]
-quo = { version = "0.1.6", package = "quo-rust" }
+quo = { version = "0.1.7", package = "quo-rust" }
 ```
 
 ### Usage
