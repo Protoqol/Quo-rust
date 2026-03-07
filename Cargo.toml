@@ -22,6 +22,8 @@ wasm-bindgen-test = "0.3.43"
 ehttp = { version = "0.6.0", features = ["json"] }
 serde-json-wasm = "1.0.1"
 
-[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
 ureq = { version = "3", default-features = false, features = ["json"] }
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 httpmock = "0.8.3"

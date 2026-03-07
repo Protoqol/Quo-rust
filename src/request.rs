@@ -1,6 +1,8 @@
 use crate::types::QuoPayload;
-use core::time::Duration;
 
+#[cfg(target_family = "wasm")]
+use core::time::Duration;
+#[cfg(target_family = "wasm")]
 use ehttp::spawn_future;
 #[cfg(target_family = "wasm")]
 use ehttp::Request;
@@ -9,21 +11,26 @@ use ehttp::{fetch_async, Headers, Mode};
 
 #[cfg(not(target_family = "wasm"))]
 use ureq::config::Config;
-#[cfg(not(target_family = "wasm"))]
-use ureq::Agent;
 
-pub fn make_request(target: String, payload: QuoPayload) -> () {
+/// Make a request to Quo.
+#[doc(hidden)]
+pub fn make_request(target: &str, payload: QuoPayload) {
+    let url = target.to_string();
+
     #[cfg(target_family = "wasm")]
     {
         let mode = Mode::NoCors;
-
-        let url = target;
         let method = String::from("POST");
-
-        let timeout = Option::from(Duration::new(1, 0));
-
-        let body = serde_json_wasm::to_vec(&payload).unwrap();
+        let timeout = Some(Duration::new(1, 0));
         let headers = Headers::new(&[("Content-Type", "application/json")]);
+
+        let body = match serde_json_wasm::to_vec(&payload) {
+            Ok(parsed_body) => parsed_body,
+            Err(_) => {
+                eprintln!("[QUO] Library error: Unparseable body. Could not convert to Vec<u8>.");
+                return;
+            }
+        };
 
         let request = Request {
             mode,
@@ -35,8 +42,15 @@ pub fn make_request(target: String, payload: QuoPayload) -> () {
         };
 
         spawn_future(async move {
-            let _ = fetch_async(request).await;
-        })
+            match fetch_async(request).await {
+                Ok(_) => {
+                    // Assume Quo received the payload.
+                }
+                Err(err) => {
+                    eprintln!("[QUO] error \"{}\" - is Quo running?", err);
+                }
+            };
+        });
     }
 
     #[cfg(not(target_family = "wasm"))]
@@ -45,13 +59,13 @@ pub fn make_request(target: String, payload: QuoPayload) -> () {
 
         let agent = config.new_agent();
 
-        let _ = match agent.post(quo_server).send_json(body) {
-            Ok(_response) => {}
+        match agent.post(url).send_json(payload) {
+            Ok(_) => {}
             Err(ureq::Error::StatusCode(code)) => {
                 eprintln!("[QUO] HTTP {} - is Quo running?", code)
             }
             Err(e) => {
-                eprintln!("[QUO] error \"{}\" - is Quo running?", e.to_string())
+                eprintln!("[QUO] error \"{}\" - is Quo running?", e)
             }
         };
     }

@@ -1,8 +1,8 @@
 #[cfg(test)]
-mod tests {
+mod lib_tests {
+    use crate::{quo, quo_create_payload};
     #[cfg(target_family = "wasm")]
     use wasm_bindgen_test::*;
-    use crate::{quo, quo_create_payload};
 
     #[cfg(target_family = "wasm")]
     wasm_bindgen_test_configure!(run_in_browser);
@@ -10,7 +10,7 @@ mod tests {
     #[test]
     fn payload_test() {
         let var = 42;
-        let payload = quo_create_payload(&var, "var", line!(), file!(), false);
+        let payload = quo_create_payload(var, "var", line!(), file!(), false);
 
         assert!(payload.meta.time_epoch_ms > 0);
         assert!(!payload.meta.uid.is_empty());
@@ -218,7 +218,7 @@ mod tests {
         assert_eq!(payload.meta.variable.name, "var_complex");
         assert_eq!(
             payload.meta.variable.var_type,
-            "&quo_rust::tests::tests::complex_type_test::Complex"
+            "&quo_rust::tests::lib_tests::complex_type_test::Complex"
         );
         assert!(payload.meta.variable.value.contains("a: 1"));
         assert!(payload.meta.variable.value.contains("complex"));
@@ -260,7 +260,7 @@ mod tests {
         assert_eq!(payload.meta.variable.name, "var_large");
         assert_eq!(
             payload.meta.variable.var_type,
-            "&quo_rust::tests::tests::large_var_test::Large"
+            "&quo_rust::tests::lib_tests::large_var_test::Large"
         );
         assert!(payload.meta.variable.value.contains("j: 10"));
         assert!(!payload.meta.variable.mutable);

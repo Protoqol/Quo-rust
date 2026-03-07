@@ -28,10 +28,7 @@ fn quo_create_payload<T: Debug>(
     is_mutable: bool,
 ) -> QuoPayload {
     let var_type = std::any::type_name_of_val(&value).to_string();
-    let name = name;
     let value = format!("{:?}", value);
-    let line = line;
-    let file = file;
     let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project");
 
     let (time_epoch_ms, uid) = get_time();
@@ -73,12 +70,11 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
         let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1");
         let env_port = option_env!("QUO_PORT").unwrap_or("7312");
 
-        let body = quo_create_payload(value, name, line, file, is_mutable);
-
         let send_fn = move || {
-            let quo_server_address = format!("{}:{}", env_host, env_port);
+            let body = quo_create_payload(value, name, line, file, is_mutable);
+            let quo_server_address = format!("{}:{}/payload", env_host, env_port);
 
-            make_request(quo_server_address, body);
+            make_request(&quo_server_address, body);
         };
 
         #[cfg(target_family = "wasm")]
@@ -88,20 +84,15 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
 
         #[cfg(not(target_family = "wasm"))]
         {
-            std::thread::spawn(send_fn);
+            // @TODO async
+            send_fn();
         }
     }
 }
 
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-pub fn __private_quo<T: Debug>(
-    value: T,
-    name: &str,
-    line: u32,
-    file: &str,
-    is_mutable: bool,
-) -> () {
+pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) {
     quo(value, name, line, file, is_mutable)
 }
 
