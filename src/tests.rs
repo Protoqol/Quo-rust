@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod lib_tests {
-    use crate::{quo, quo_create_payload};
+    use crate::quo_create_payload;
+
     #[cfg(target_family = "wasm")]
     use wasm_bindgen_test::*;
 
@@ -77,8 +78,7 @@ mod lib_tests {
     fn macro_string_test() {
         let var_string: &str = "string";
 
-        let payload =
-            quo_create_payload(var_string, "var_string", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_string, "var_string", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_string");
         assert_eq!(payload.meta.variable.value, "\"string\"");
         assert_eq!(payload.meta.variable.var_type, "&str");
@@ -136,10 +136,7 @@ mod lib_tests {
             payload.meta.variable.value,
             "[\"hope\", \"this\", \"works\"]"
         );
-        assert_eq!(
-            payload.meta.variable.var_type,
-            "[alloc::string::String; 3]"
-        );
+        assert_eq!(payload.meta.variable.var_type, "[alloc::string::String; 3]");
         assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
@@ -152,8 +149,7 @@ mod lib_tests {
             String::from("works"),
         ];
 
-        let payload =
-            quo_create_payload(var_vector, "var_vector", line!(), file!(), false, "test");
+        let payload = quo_create_payload(var_vector, "var_vector", line!(), file!(), false, "test");
         assert_eq!(payload.meta.variable.name, "var_vector");
         assert_eq!(
             payload.meta.variable.value,
