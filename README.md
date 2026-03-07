@@ -8,6 +8,8 @@ Quo is a cross-platform variable dumper designed to make debugging easier. It re
 displays it in a clean desktop interface, allowing you to inspect complex values in real-time without cluttering your
 terminal or browser console.
 
+> **Note**: This package requires the [Quo desktop client](https://github.com/Protoqol/Quo) to be running to display the debug data.
+
 ### Noteworthy features
 
 - **Debug-only**: The macro only executes in debug mode (`#[cfg(debug_assertions)]`). In release builds, it compiles to nothing, ensuring zero overhead.
