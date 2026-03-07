@@ -1,7 +1,7 @@
 [package]
 name = "quo-rust"
 description = "Companion package for the Quo debugger."
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 authors = ["Protoqol <open-source@protoqol.nl"]
 readme = "README.md"
@@ -14,12 +14,14 @@ exclude = [
 ]
 
 [dependencies]
-ureq = { version = "3", default-features = false, features = ["json"] }
 serde = { version = "1", features = ["derive"] }
+chrono = { version = "0.4", features = ["wasmbind"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-getrandom = { version = "0.2.15", features = ["js"] }
-js-sys = "0.3.70"
+wasm-bindgen-test = "0.3.43"
+ehttp = { version = "0.6.0", features = ["json"] }
+serde-json-wasm = "1.0.1"
 
-[dev-dependencies]
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+ureq = { version = "3", default-features = false, features = ["json"] }
 httpmock = "0.8.3"

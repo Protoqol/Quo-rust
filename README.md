@@ -15,7 +15,7 @@ Add `quo-rust` to your `Cargo.toml` under `dev-dependencies`:
 
 ```toml
 [dev-dependencies]
-quo-rust = "0.1.2"
+quo-rust = "0.1.6"
 ```
 
 ### Usage
@@ -59,6 +59,21 @@ You can set these in your `Cargo.toml` as follows
 [env]
 QUO_HOST="http://127.0.0.1"
 QUO_PORT="7312"
+```
+
+### Testing WASM targets
+
+When targeting WebAssembly (`wasm32-unknown-unknown`), standard `cargo test` will fail because WASM binaries cannot be executed directly on your host machine. Instead, use a tool like `wasm-pack` to run tests in a headless browser or Node.js:
+
+```bash
+# Run tests in a headless Chrome/Firefox
+wasm-pack test --chrome --headless
+```
+
+Alternatively, you can verify that your code compiles correctly for WASM by running:
+
+```bash
+cargo check --target wasm32-unknown-unknown --tests
 ```
 
 ---
