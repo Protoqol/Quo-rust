@@ -69,10 +69,8 @@ fn quo_create_payload<T: Debug>(
 fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
     #[cfg(debug_assertions)]
     {
-        let env_host = option_env!("QUO_HOST")
-            .unwrap_or("http://127.0.0.1")
-            .to_string();
-        let env_port = option_env!("QUO_PORT").unwrap_or("7312").to_string();
+        let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1");
+        let env_port = option_env!("QUO_PORT").unwrap_or("7312");
 
         let body = quo_create_payload(value, name, line, file, is_mutable);
 
