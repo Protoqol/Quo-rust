@@ -1,9 +1,10 @@
 mod types;
 
+use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
 use std::fmt::Debug;
 use std::time::{SystemTime, UNIX_EPOCH};
-use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
-
+use ureq::config::Config;
+use ureq::tls::{TlsConfig, TlsProvider};
 
 /// This fn creates a QuoPayload. You might or might not question why this is a separate function: for testing.
 ///
@@ -17,7 +18,13 @@ use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVar
 ///
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> QuoPayload {
+fn quo_create_payload<T: Debug>(
+    value: T,
+    name: &str,
+    line: u32,
+    file: &str,
+    is_mutable: bool,
+) -> QuoPayload {
     let var_type = std::any::type_name_of_val(&value).to_string();
     let name = name;
     let value = format!("{:?}", value);
@@ -62,13 +69,26 @@ fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str, is_
 fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
     #[cfg(debug_assertions)]
     {
-        let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1").to_string();
+        let env_host = option_env!("QUO_HOST")
+            .unwrap_or("http://127.0.0.1")
+            .to_string();
         let env_port = option_env!("QUO_PORT").unwrap_or("7312").to_string();
 
         let body = quo_create_payload(value, name, line, file, is_mutable);
 
         let send_fn = move || {
             let quo_server = format!("{}:{}", env_host, env_port);
+
+            let mut config = Config::builder()
+                .tls_config(
+                    TlsConfig::builder()
+                        .provider(TlsProvider::NativeTls)
+                        .build(),
+                )
+                .user_agent("Quo-Rust")
+                .build();
+
+            let agent = config.new_agent();
 
             let _ = match ureq::post(quo_server).send_json(body) {
                 Ok(_response) => {}
@@ -95,7 +115,13 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
 
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
+pub fn __private_quo<T: Debug>(
+    value: T,
+    name: &str,
+    line: u32,
+    file: &str,
+    is_mutable: bool,
+) -> () {
     quo(value, name, line, file, is_mutable)
 }
 
@@ -376,10 +402,10 @@ mod tests {
     fn macro_mut_explicit_test() {
         let mut var_mut = 1;
         quo!(mut var_mut);
-        
+
         let payload = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true);
         assert!(payload.meta.variable.mutable);
-        
+
         var_mut = 2;
         quo!(var_mut);
     }

@@ -14,12 +14,8 @@ exclude = [
 ]
 
 [dependencies]
-ureq = { version = "3", default-features = false, features = ["json"] }
+ureq = { version = "3", features = ["json", "native-tls"] }
 serde = { version = "1", features = ["derive"] }
-
-[features]
-default = ["tls"]
-tls = ["ureq/rustls"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 getrandom = { version = "0.2.15", features = ["js"] }
