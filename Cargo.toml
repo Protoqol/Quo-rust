@@ -1,5 +1,6 @@
 [package]
 name = "quo-rust"
+description = "Companion package for the Quo debugger."
 version = "0.1.1"
 edition = "2021"
 authors = ["Protoqol <open-source@protoqol.nl"]
