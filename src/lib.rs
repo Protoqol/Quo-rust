@@ -1,47 +1,9 @@
+mod types;
 
-use serde::Deserialize;
-use serde::Serialize;
 use std::fmt::Debug;
 use std::time::{SystemTime, UNIX_EPOCH};
+use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
 
-#[derive(Serialize, Debug, PartialEq)]
-pub struct QuoPayloadVariable {
-    pub var_type: String,
-    pub name: String,
-    pub value: String,
-    pub mutable: bool,
-    pub is_constant: bool,
-}
-
-#[derive(Serialize, Debug, PartialEq)]
-pub struct QuoPayloadMeta {
-    pub id: u32,
-    pub uid: String,
-    pub origin: String,
-    pub sender_origin: String,
-    pub time_epoch_ms: i64,
-    pub variable: QuoPayloadVariable,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default)]
-#[serde(rename_all = "lowercase")]
-pub enum QuoPayloadLanguage {
-    Rust,
-    Php,
-    Javascript,
-    Typescript,
-    Python,
-    Ruby,
-    Go,
-    #[default]
-    Unknown,
-}
-
-#[derive(Serialize, Debug, PartialEq)]
-pub struct QuoPayload {
-    pub meta: QuoPayloadMeta,
-    pub language: QuoPayloadLanguage,
-}
 
 /// This fn creates a QuoPayload. You might or might not question why this is a separate function: for testing.
 ///
@@ -55,7 +17,7 @@ pub struct QuoPayload {
 ///
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str) -> QuoPayload {
+fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> QuoPayload {
     let var_type = std::any::type_name_of_val(&value).to_string();
     let name = name;
     let value = format!("{:?}", value);
@@ -77,8 +39,7 @@ fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str) -> 
                 var_type: var_type.clone(),
                 name: name.to_string(),
                 value: value.clone(),
-                // @TODO Detect if is mutable or not
-                mutable: true,
+                mutable: is_mutable,
                 // @TODO Correctly detect const.
                 is_constant: name == name.to_uppercase(),
             },
@@ -98,33 +59,44 @@ fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str) -> 
 ///
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str) -> () {
+fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
     #[cfg(debug_assertions)]
     {
-        let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1");
-        let env_port = option_env!("QUO_PORT").unwrap_or("7312");
+        let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1").to_string();
+        let env_port = option_env!("QUO_PORT").unwrap_or("7312").to_string();
 
-        let quo_server = format!("{}:{}", env_host, env_port);
+        let body = quo_create_payload(value, name, line, file, is_mutable);
 
-        let body = quo_create_payload(value, name, line, file);
+        let send_fn = move || {
+            let quo_server = format!("{}:{}", env_host, env_port);
 
-        let _ = match ureq::post(quo_server).send_json(body) {
-            Ok(_response) => {}
-            Err(ureq::Error::StatusCode(code)) => {
-                // @TODO add extra debugging.
-                eprintln!("[Quo] HTTP {} - is Quo running?", code)
-            }
-            Err(e) => {
-                eprintln!("[Quo] error \"{}\" - is Quo running?", e.to_string())
-            }
+            let _ = match ureq::post(quo_server).send_json(body) {
+                Ok(_response) => {}
+                Err(ureq::Error::StatusCode(code)) => {
+                    eprintln!("[Quo] HTTP {} - is Quo running?", code)
+                }
+                Err(e) => {
+                    eprintln!("[Quo] error \"{}\" - is Quo running?", e.to_string())
+                }
+            };
         };
+
+        #[cfg(all(target_arch = "wasm32", not(target_feature = "atomics")))]
+        {
+            send_fn();
+        }
+
+        #[cfg(not(all(target_arch = "wasm32", not(target_feature = "atomics"))))]
+        {
+            std::thread::spawn(send_fn);
+        }
     }
 }
 
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str) -> () {
-    quo(value, name, line, file)
+pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
+    quo(value, name, line, file, is_mutable)
 }
 
 /// This macro sends the provided variable to Quo using the quo() fn.
@@ -139,10 +111,16 @@ pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str) -> (
 ///
 #[macro_export]
 macro_rules! quo {
+    ($( mut $var:ident ),*) => {{
+        #[cfg(debug_assertions)]
+        $(
+            $crate::__private_quo(&$var, stringify!($var), line!(), file!(), true);
+        )*
+    }};
     ($( $var:ident ),*) => {{
         #[cfg(debug_assertions)]
         $(
-            $crate::__private_quo(&$var, stringify!($var), line!(), file!());
+            $crate::__private_quo(&$var, stringify!($var), line!(), file!(), false);
         )*
     }};
 }
@@ -155,11 +133,11 @@ mod tests {
     fn fn_test() {
         let fn_test_var = 1234;
 
-        let payload = quo_create_payload(&fn_test_var, "fn_test_var", line!(), file!());
+        let payload = quo_create_payload(&fn_test_var, "fn_test_var", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "fn_test_var");
         assert_eq!(payload.meta.variable.value, "1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -169,11 +147,11 @@ mod tests {
 
         quo!(VAR_I32, VAR_I32, VAR_I32);
 
-        let payload = quo_create_payload(&VAR_I32, "VAR_I32", line!(), file!());
+        let payload = quo_create_payload(&VAR_I32, "VAR_I32", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "VAR_I32");
         assert_eq!(payload.meta.variable.value, "-1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(payload.meta.variable.is_constant);
     }
 
@@ -181,11 +159,11 @@ mod tests {
     fn macro_i32_test() {
         let var_i32: i32 = -1234;
 
-        let payload = quo_create_payload(&var_i32, "var_i32", line!(), file!());
+        let payload = quo_create_payload(&var_i32, "var_i32", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_i32");
         assert_eq!(payload.meta.variable.value, "-1234");
         assert_eq!(payload.meta.variable.var_type, "&i32");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -193,11 +171,11 @@ mod tests {
     fn macro_u32_test() {
         let var_u32: u32 = 1234;
 
-        let payload = quo_create_payload(&var_u32, "var_u32", line!(), file!());
+        let payload = quo_create_payload(&var_u32, "var_u32", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_u32");
         assert_eq!(payload.meta.variable.value, "1234");
         assert_eq!(payload.meta.variable.var_type, "&u32");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -205,11 +183,11 @@ mod tests {
     fn macro_string_test() {
         let var_string: &str = "string";
 
-        let payload = quo_create_payload(&var_string, "var_string", line!(), file!());
+        let payload = quo_create_payload(&var_string, "var_string", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_string");
         assert_eq!(payload.meta.variable.value, "\"string\"");
         assert_eq!(payload.meta.variable.var_type, "&&str");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -217,11 +195,11 @@ mod tests {
     fn macro_bool_test() {
         let var_bool: bool = true;
 
-        let payload = quo_create_payload(&var_bool, "var_bool", line!(), file!());
+        let payload = quo_create_payload(&var_bool, "var_bool", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_bool");
         assert_eq!(payload.meta.variable.value, "true");
         assert_eq!(payload.meta.variable.var_type, "&bool");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -235,7 +213,7 @@ mod tests {
             23423,
         );
 
-        let payload = quo_create_payload(&var_tuple, "var_tuple", line!(), file!());
+        let payload = quo_create_payload(&var_tuple, "var_tuple", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_tuple");
         assert_eq!(
             payload.meta.variable.value,
@@ -245,7 +223,7 @@ mod tests {
             payload.meta.variable.var_type,
             "&(bool, alloc::string::String, alloc::string::String, alloc::string::String, u32)"
         );
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -257,7 +235,7 @@ mod tests {
             String::from("works"),
         ];
 
-        let payload = quo_create_payload(&var_array, "var_array", line!(), file!());
+        let payload = quo_create_payload(&var_array, "var_array", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_array");
         assert_eq!(
             payload.meta.variable.value,
@@ -267,7 +245,7 @@ mod tests {
             payload.meta.variable.var_type,
             "&[alloc::string::String; 3]"
         );
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -279,7 +257,7 @@ mod tests {
             String::from("works"),
         ];
 
-        let payload = quo_create_payload(&var_vector, "var_vector", line!(), file!());
+        let payload = quo_create_payload(&var_vector, "var_vector", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_vector");
         assert_eq!(
             payload.meta.variable.value,
@@ -289,14 +267,14 @@ mod tests {
             payload.meta.variable.var_type,
             "&alloc::vec::Vec<alloc::string::String>"
         );
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
     #[test]
     fn macro_mut_test() {
         let mut var_mut = 1;
-        let payload1 = quo_create_payload(&var_mut, "var_mut", line!(), file!());
+        let payload1 = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true);
         assert_eq!(payload1.meta.variable.name, "var_mut");
         assert_eq!(payload1.meta.variable.value, "1");
         assert_eq!(payload1.meta.variable.var_type, "&i32");
@@ -304,7 +282,7 @@ mod tests {
         assert!(!payload1.meta.variable.is_constant);
 
         var_mut = 2;
-        let payload2 = quo_create_payload(&var_mut, "var_mut", line!(), file!());
+        let payload2 = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true);
         assert_eq!(payload2.meta.variable.name, "var_mut");
         assert_eq!(payload2.meta.variable.value, "2");
         assert_eq!(payload2.meta.variable.var_type, "&i32");
@@ -315,11 +293,11 @@ mod tests {
     #[test]
     fn macro_immut_test() {
         let var_immut = 1;
-        let payload = quo_create_payload(&var_immut, "var_immut", line!(), file!());
+        let payload = quo_create_payload(&var_immut, "var_immut", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_immut");
         assert_eq!(payload.meta.variable.value, "1");
         assert_eq!(payload.meta.variable.var_type, "&i32");
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -341,7 +319,7 @@ mod tests {
             d: true,
         };
 
-        let payload = quo_create_payload(&var_complex, "var_complex", line!(), file!());
+        let payload = quo_create_payload(&var_complex, "var_complex", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_complex");
         assert_eq!(
             payload.meta.variable.var_type,
@@ -349,7 +327,7 @@ mod tests {
         );
         assert!(payload.meta.variable.value.contains("a: 1"));
         assert!(payload.meta.variable.value.contains("complex"));
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
     }
 
@@ -383,14 +361,26 @@ mod tests {
             j: 10,
         };
 
-        let payload = quo_create_payload(&var_large, "var_large", line!(), file!());
+        let payload = quo_create_payload(&var_large, "var_large", line!(), file!(), false);
         assert_eq!(payload.meta.variable.name, "var_large");
         assert_eq!(
             payload.meta.variable.var_type,
             "&quo_rust::tests::large_var_test::Large"
         );
         assert!(payload.meta.variable.value.contains("j: 10"));
-        assert!(payload.meta.variable.mutable);
+        assert!(!payload.meta.variable.mutable);
         assert!(!payload.meta.variable.is_constant);
+    }
+
+    #[test]
+    fn macro_mut_explicit_test() {
+        let mut var_mut = 1;
+        quo!(mut var_mut);
+        
+        let payload = quo_create_payload(&var_mut, "var_mut", line!(), file!(), true);
+        assert!(payload.meta.variable.mutable);
+        
+        var_mut = 2;
+        quo!(var_mut);
     }
 }

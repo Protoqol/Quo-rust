@@ -1,7 +1,7 @@
 [package]
 name = "quo-rust"
 description = "Companion package for the Quo debugger."
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Protoqol <open-source@protoqol.nl"]
 readme = "README.md"
@@ -14,5 +14,15 @@ exclude = [
 ]
 
 [dependencies]
-ureq = { version = "3", features = ["json"] }
+ureq = { version = "3", default-features = false, features = ["json"] }
 serde = { version = "1", features = ["derive"] }
+
+[features]
+default = ["tls"]
+tls = ["ureq/rustls"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2.15", features = ["js"] }
+
+[dev-dependencies]
+httpmock = "0.8.3"
