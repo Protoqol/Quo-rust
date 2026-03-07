@@ -1,7 +1,7 @@
 [package]
 name = "quo-rust"
 description = "Companion package for the Quo debugger."
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Protoqol <open-source@protoqol.nl"]
 readme = "README.md"
@@ -14,5 +14,5 @@ exclude = [
 ]
 
 [dependencies]
-ureq = { version = "3", features = ["socks-proxy", "charset", "json"] }
+ureq = { version = "3", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
