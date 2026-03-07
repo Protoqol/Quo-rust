@@ -1,9 +1,13 @@
 [package]
 name = "quo-rust"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Protoqol <open-source@protoqol.nl"]
+readme = "README.md"
 license = "GPL-3"
+repository = "https://github.com/Protoqol/Quo-rust"
+keywords = ["quo", "debug", "debugging"]
+categories = ["development-tools", "development-tools::debugging", "development-tools::testing"]
 
 [dependencies]
 ureq = { version = "3", features = ["socks-proxy", "charset", "json"] }

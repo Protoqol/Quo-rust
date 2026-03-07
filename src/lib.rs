@@ -101,7 +101,7 @@ fn quo_create_payload<T: Debug>(value: T, name: &str, line: u32, file: &str) -> 
 fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str) -> () {
     #[cfg(debug_assertions)]
     {
-        let env_host = option_env!("QUO_HOST").unwrap_or("127.0.0.1");
+        let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1");
         let env_port = option_env!("QUO_PORT").unwrap_or("7312");
 
         let quo_server = format!("{}:{}", env_host, env_port);
