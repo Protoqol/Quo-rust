@@ -9,6 +9,9 @@ license = "GPL-3"
 repository = "https://github.com/Protoqol/Quo-rust"
 keywords = ["quo", "debug", "debugging"]
 categories = ["development-tools", "development-tools::debugging", "development-tools::testing"]
+exclude = [
+    ".github/**/*"
+]
 
 [dependencies]
 ureq = { version = "3", features = ["socks-proxy", "charset", "json"] }
