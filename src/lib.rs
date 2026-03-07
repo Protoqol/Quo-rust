@@ -26,10 +26,10 @@ fn quo_create_payload<T: Debug>(
     line: u32,
     file: &str,
     is_mutable: bool,
+    package_name: &str,
 ) -> QuoPayload {
     let var_type = std::any::type_name_of_val(&value).to_string();
     let value = format!("{:?}", value);
-    let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project");
 
     let (time_epoch_ms, uid) = get_time();
 
@@ -64,14 +64,21 @@ fn quo_create_payload<T: Debug>(
 ///
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) -> () {
+fn quo<T: Debug>(
+    value: T,
+    name: &str,
+    line: u32,
+    file: &str,
+    is_mutable: bool,
+    package_name: &str,
+) {
     #[cfg(debug_assertions)]
     {
         let env_host = option_env!("QUO_HOST").unwrap_or("http://127.0.0.1");
         let env_port = option_env!("QUO_PORT").unwrap_or("7312");
 
         let send_fn = move || {
-            let body = quo_create_payload(value, name, line, file, is_mutable);
+            let body = quo_create_payload(value, name, line, file, is_mutable, package_name);
             let quo_server_address = format!("{}:{}/payload", env_host, env_port);
 
             make_request(&quo_server_address, body);
@@ -92,8 +99,15 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
 
 #[cfg(debug_assertions)]
 #[doc(hidden)]
-pub fn __private_quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) {
-    quo(value, name, line, file, is_mutable)
+pub fn __private_quo<T: Debug>(
+    value: T,
+    name: &str,
+    line: u32,
+    file: &str,
+    is_mutable: bool,
+    package_name: &str,
+) {
+    quo(value, name, line, file, is_mutable, package_name)
 }
 
 /// This macro sends the provided variable to Quo using the quo() fn.
@@ -111,13 +125,19 @@ macro_rules! quo {
     ($( mut $var:ident ),*) => {{
         #[cfg(debug_assertions)]
         $(
-            $crate::__private_quo(&$var, stringify!($var), line!(), file!(), true);
+            {
+                let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
+                $crate::__private_quo(&$var, stringify!($var), line!(), file!(), true, package_name);
+            }
         )*
     }};
     ($( $var:ident ),*) => {{
         #[cfg(debug_assertions)]
         $(
-            $crate::__private_quo(&$var, stringify!($var), line!(), file!(), false);
+            {
+                let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project"); // Make sure we don't just get `quo-rust`.
+                $crate::__private_quo(&$var, stringify!($var), line!(), file!(), false, package_name);
+            }
         )*
     }};
 }
