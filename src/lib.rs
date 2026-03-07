@@ -90,7 +90,7 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
 
             let agent = config.new_agent();
 
-            let _ = match ureq::post(quo_server).send_json(body) {
+            let _ = match agent.post(quo_server).send_json(body) {
                 Ok(_response) => {}
                 Err(ureq::Error::StatusCode(code)) => {
                     eprintln!("[Quo] HTTP {} - is Quo running?", code)
