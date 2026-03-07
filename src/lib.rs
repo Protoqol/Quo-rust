@@ -1,8 +1,12 @@
 mod types;
 
+#[cfg(target_family = "wasm")]
+use js_sys::Date;
+#[cfg(not(target_family = "wasm"))]
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use crate::types::{QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
 use std::fmt::Debug;
-use std::time::{SystemTime, UNIX_EPOCH};
 use ureq::config::Config;
 
 /// This fn creates a QuoPayload. You might or might not question why this is a separate function: for testing.
@@ -31,16 +35,29 @@ fn quo_create_payload<T: Debug>(
     let file = file;
     let package_name = option_env!("CARGO_PKG_NAME").unwrap_or("Rust project");
 
-    let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    #[cfg(target_family = "wasm")]
+    let (time_epoch_ms, uid) = {
+        let now = js_sys::Date::now();
+        (now as i64, now.to_string())
+    };
+
+    #[cfg(not(target_family = "wasm"))]
+    let (time_epoch_ms, uid) = {
+        let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        (
+            since_the_epoch.as_millis() as i64,
+            since_the_epoch.as_nanos().to_string(),
+        )
+    };
 
     QuoPayload {
         language: QuoPayloadLanguage::Rust,
         meta: QuoPayloadMeta {
             id: 0,
-            uid: since_the_epoch.as_nanos().to_string(),
+            uid,
             origin: package_name.to_string(),
             sender_origin: format!("{}:{}", file, line),
-            time_epoch_ms: since_the_epoch.as_millis() as i64,
+            time_epoch_ms,
             variable: QuoPayloadVariable {
                 var_type: var_type.clone(),
                 name: name.to_string(),
@@ -76,9 +93,7 @@ fn quo<T: Debug>(value: T, name: &str, line: u32, file: &str, is_mutable: bool) 
         let send_fn = move || {
             let quo_server = format!("{}:{}", env_host, env_port);
 
-            let config = Config::builder()
-                .user_agent("Quo-Rust")
-                .build();
+            let config = Config::builder().user_agent("Quo-Rust").build();
 
             let agent = config.new_agent();
 
