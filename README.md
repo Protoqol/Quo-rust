@@ -13,7 +13,7 @@ terminal or browser console.
 ### Noteworthy features
 
 - **Debug-only**: The macro only executes in debug mode (`#[cfg(debug_assertions)]`). In release builds, it compiles to nothing, ensuring zero overhead.
-- **Multiple arguments**: Inspect multiple variables in a single call.
+- **Multiple arguments**: Inspect multiple variables or expressions in a single call.
 - **Rich Metadata**: Capture stack traces, system metrics, memory addresses, and more.
 
 ### Installation
