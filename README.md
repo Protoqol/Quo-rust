@@ -14,15 +14,36 @@ terminal or browser console.
 
 - **Debug-only**: The macro only executes in debug mode (`#[cfg(debug_assertions)]`). In release builds, it compiles to nothing, ensuring zero overhead.
 - **Multiple arguments**: Inspect multiple variables in a single call.
+- **Rich Metadata**: Capture stack traces, system metrics, memory addresses, and more.
 
 ### Installation
 
-Add `quo` to your `Cargo.toml` under `dev-dependencies`:
+Add `quo` to your `Cargo.toml` under `dependencies`:
 
 ```toml
-[dev-dependencies]
-quo = { version = "0.1.7", package = "quo-rust" }
+[dependencies]
+quo = { version = "0.1.8", package = "quo-rust" }
 ```
+
+To enable additional data capture, use feature flags:
+
+```toml
+[dependencies]
+# Enable specific features
+quo = { version = "0.1.8", package = "quo-rust", features = ["stack-trace", "system-info", "hashing"] }
+
+# Or enable everything
+quo = { version = "0.1.8", package = "quo-rust", features = ["full"] }
+```
+
+### Available Features
+
+- `stack-trace`: Captures the call stack and the caller function name.
+- `system-info`: Captures current CPU and memory usage of the process.
+- `hashing`: Generates a reproducible grouping hash for variables (`var_type:name:origin`), allowing the Quo client to group and diff values over time.
+- `full`: Enables all the above features.
+
+Basic info like **Thread ID/Name**, **Runtime Environment** (OS/Arch), and **Memory Address** are included by default.
 
 ### Usage
 
@@ -46,6 +67,9 @@ fn main() {
 
     // Dump multiple variables at once
     quo!(user_id, user);
+    
+    // Some quick maths
+    quo!(42 * 42);
 }
 ```
 
