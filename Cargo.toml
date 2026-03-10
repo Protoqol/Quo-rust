@@ -16,16 +16,15 @@ exclude = [
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 chrono = { version = "0.4", features = ["wasmbind"] }
+twox-hash = { version = "2.1.2", features = ["xxhash64"] }
 backtrace = { version = "0.3", optional = true }
 sysinfo = { version = "0.38.3", optional = true }
-sha2 = { version = "0.10.9", optional = true }
 
 [features]
 default = []
 stack-trace = ["dep:backtrace"]
 system-info = ["dep:sysinfo"]
-hashing = ["dep:sha2"]
-full = ["stack-trace", "system-info", "hashing"]
+full = ["stack-trace", "system-info"]
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 wasm-bindgen-test = "0.3.43"
