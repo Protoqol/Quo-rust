@@ -51,6 +51,7 @@
 /// ```
 #[macro_export]
 macro_rules! quo {
+    // Mutable var(s)
     ($( mut $var:ident ), + $(,)?) => {{
         #[cfg(debug_assertions)]
         {
@@ -59,10 +60,12 @@ macro_rules! quo {
                 concat!($(stringify!($var), ","),+),
                 quo_package_name,
             );
+
             $(
                 #[cfg(target_family = "wasm")]
                 {
                     let quo_file_path = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+
                     $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                         line: line!(),
                         file: &quo_file_path,
@@ -77,6 +80,7 @@ macro_rules! quo {
                 {
                     let quo_path_buf = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(file!());
                     let quo_file_path = quo_path_buf.to_str().unwrap_or(file!());
+
                     $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                         line: line!(),
                         file: quo_file_path,
@@ -90,6 +94,7 @@ macro_rules! quo {
         }
     }};
 
+    // Var(s)
     ($( $var:ident ), + $(,)?) => {
         #[cfg(debug_assertions)]
         {
@@ -98,11 +103,13 @@ macro_rules! quo {
                 concat!($(stringify!($var), ","),+),
                 __quo_package_name,
             );
+
             $(
                 {
                     #[cfg(target_family = "wasm")]
                     {
                         let quo_file_path = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+
                         $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                             line: line!(),
                             file: &quo_file_path.to_owned(),
@@ -117,6 +124,7 @@ macro_rules! quo {
                     {
                         let quo_path_buf = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(file!());
                         let quo_file_path = quo_path_buf.to_str().unwrap_or(file!());
+
                         $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                             line: line!(),
                             file: quo_file_path,
@@ -131,6 +139,7 @@ macro_rules! quo {
         }
     };
 
+    // Expression(s)
     ($( $var:expr ), + $(,)?) => {
         #[cfg(debug_assertions)]
         {
@@ -139,11 +148,13 @@ macro_rules! quo {
                 concat!($(stringify!($var), ","),+),
                 __quo_package_name,
             );
+
             $(
                 {
                     #[cfg(target_family = "wasm")]
                     {
                         let quo_file_path = concat!(env!("CARGO_MANIFEST_DIR"), "/", file!());
+
                         $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                             line: line!(),
                             file: &quo_file_path.to_owned(),
@@ -158,6 +169,7 @@ macro_rules! quo {
                     {
                         let quo_path_buf = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(file!());
                         let quo_file_path = quo_path_buf.to_str().unwrap_or(file!());
+
                         $crate::__private_quo(&$var, stringify!($var), $crate::__private_QuoContext {
                             line: line!(),
                             file: quo_file_path,
