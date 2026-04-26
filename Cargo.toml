@@ -15,7 +15,7 @@ exclude = [
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-chrono = { version = "0.4", features = ["wasmbind"] }
+chrono = { version = "0.4.44", features = ["wasmbind"] }
 twox-hash = { version = "2.1.2", features = ["xxhash64"] }
 backtrace = { version = "0.3", optional = true }
 sysinfo = { version = "0.38.4", optional = true }
@@ -27,10 +27,11 @@ system-info = ["dep:sysinfo"]
 full = ["stack-trace", "system-info"]
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-wasm-bindgen-test = "0.3.43"
-ehttp = { version = "0.6.0", features = ["json"] }
+wasm-bindgen-test = "0.3.68"
+ehttp = { version = "0.7.1", features = ["json"] }
 serde-json-wasm = "1.0.1"
-getrandom = { version = "0.3", features = ["wasm_js"] }
+getrandom = { version = "0.4.2", features = ["wasm_js"] }
+getrandom_v3 = { version = "0.3", features = ["wasm_js"], package = "getrandom" }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 ureq = { version = "3", default-features = false, features = ["json"] }

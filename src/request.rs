@@ -7,7 +7,7 @@ use ehttp::spawn_future;
 #[cfg(target_family = "wasm")]
 use ehttp::Request;
 #[cfg(target_family = "wasm")]
-use ehttp::{fetch_async, Headers, Mode};
+use ehttp::{fetch_async, Credentials, Headers, Method, Mode};
 
 #[cfg(not(target_family = "wasm"))]
 use ureq::config::Config;
@@ -22,7 +22,7 @@ pub fn make_request(target: &str, payload: QuoPayload) {
     #[cfg(target_family = "wasm")]
     {
         let mode = Mode::NoCors;
-        let method = String::from("POST");
+        let method = Method::POST;
         let timeout = Some(Duration::new(1, 0));
         let headers = Headers::new(&[("Content-Type", "application/json")]);
 
@@ -41,6 +41,7 @@ pub fn make_request(target: &str, payload: QuoPayload) {
             timeout,
             body,
             headers,
+            credentials: Credentials::default(),
         };
 
         spawn_future(async move {
