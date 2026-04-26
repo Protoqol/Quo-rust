@@ -18,8 +18,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_hash_none_without_feature() {
-        assert!(get_hash("i32", "var", "pkg").is_none()); // You never know for sure...
+    fn test_get_hash_returns_some() {
+        assert!(get_hash("i32", "var", "pkg").is_some());
     }
 
     #[test]
