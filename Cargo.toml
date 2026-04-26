@@ -30,6 +30,7 @@ full = ["stack-trace", "system-info"]
 wasm-bindgen-test = "0.3.43"
 ehttp = { version = "0.6.0", features = ["json"] }
 serde-json-wasm = "1.0.1"
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 ureq = { version = "3", default-features = false, features = ["json"] }
