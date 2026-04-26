@@ -381,17 +381,27 @@ mod lib_tests {
 
     #[test]
     fn test_grouping_hash_differs_between_calls() {
-        // Two separate quo!() calls with different arguments should produce different grouping hashes.
+        // Two separate quo!() calls — even with the same arguments — must produce different
+        // grouping hashes because each invocation incorporates the current timestamp.
         let hash1 = __private_quo_grouping_hash("a,b,", "test");
-        let hash2 = __private_quo_grouping_hash("x,y,z,", "test");
-        assert_ne!(hash1, hash2, "different argument sets must produce different grouping hashes");
+        let hash2 = __private_quo_grouping_hash("a,b,", "test");
+        assert_ne!(hash1, hash2, "same-arg calls at different times must produce different grouping hashes");
+
+        // Different argument sets must also differ.
+        let hash3 = __private_quo_grouping_hash("a,b,", "test");
+        let hash4 = __private_quo_grouping_hash("x,y,z,", "test");
+        assert_ne!(hash3, hash4, "different argument sets must produce different grouping hashes");
     }
 
     #[test]
-    fn test_grouping_hash_consistent() {
-        // Same args_key and package_name always produce the same hash (deterministic).
-        let hash_first  = __private_quo_grouping_hash("var,other,", "test");
-        let hash_second = __private_quo_grouping_hash("var,other,", "test");
-        assert_eq!(hash_first, hash_second, "grouping hash must be deterministic");
+    fn test_grouping_hash_unique_per_invocation() {
+        // Each call to __private_quo_grouping_hash produces a unique hash so that
+        // two separate quo!(...) macro calls never share a grouping_hash, even when
+        // their arguments and package name are identical.
+        let hashes: Vec<Option<String>> = (0..5)
+            .map(|_| __private_quo_grouping_hash("var,other,", "test"))
+            .collect();
+        let unique: std::collections::HashSet<String> = hashes.into_iter().flatten().collect();
+        assert_eq!(unique.len(), 5, "every invocation must produce a unique grouping hash");
     }
 }

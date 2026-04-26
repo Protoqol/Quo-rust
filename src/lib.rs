@@ -98,10 +98,14 @@ fn quo<T: Debug>(value: T, name: &str, ctx: QuoContext<'_>) {
 }
 
 /// Use the `quo!()` macro and not this fn directly.
+/// Returns a hash that is unique per call-site invocation: the nanosecond
+/// timestamp is mixed in so two separate `quo!(…)` calls — even with
+/// identical arguments — always produce different grouping hashes.
 #[cfg(debug_assertions)]
 #[doc(hidden)]
 pub fn __private_quo_grouping_hash(args_key: &str, package_name: &str) -> Option<String> {
-    get_hash("grouped", args_key, package_name)
+    let (_, call_uid) = get_time();
+    get_hash("grouped", &format!("{args_key}:{call_uid}"), package_name)
 }
 
 /// Use the `quo!()` macro and not this fn directly.
