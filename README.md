@@ -22,7 +22,7 @@ Add `quo` to your `Cargo.toml` under `dependencies`:
 
 ```toml
 [dependencies]
-quo = { version = "0.1.9", package = "quo-rust" }
+quo = { version = "0.1", package = "quo-rust" }
 ```
 
 To enable additional data capture, use feature flags:
@@ -30,10 +30,10 @@ To enable additional data capture, use feature flags:
 ```toml
 [dependencies]
 # Enable specific features
-quo = { version = "0.1.9", package = "quo-rust", features = ["stack-trace", "system-info", "hashing"] }
+quo = { version = "0.1", package = "quo-rust", features = ["stack-trace", "system-info", "hashing"] }
 
 # Or enable everything
-quo = { version = "0.1.9", package = "quo-rust", features = ["full"] }
+quo = { version = "0.1", package = "quo-rust", features = ["full"] }
 ```
 
 ### Available Features

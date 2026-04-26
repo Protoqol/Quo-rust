@@ -14,6 +14,8 @@ use crate::request::make_request;
 use crate::types::{QuoContext, QuoPayload, QuoPayloadLanguage, QuoPayloadMeta, QuoPayloadVariable};
 pub use crate::types::QuoContext as __private_QuoContext;
 use std::fmt::Debug;
+use serde_json_wasm::to_string;
+use uuid::Uuid;
 
 /// This fn creates a QuoPayload. You might or might not question why this is a separate function: for testing.
 ///
@@ -36,7 +38,9 @@ fn quo_create_payload<T: Debug>(value: T, name: &str, ctx: QuoContext<'_>) -> Qu
         .to_string();
 
     let value_str = format!("{:?}", value);
-    let (time_epoch_ms, uid) = get_time();
+
+    let uid: String = Uuid::new_v4().to_string();
+    let time_epoch_ms = get_time();
     let memory_address = Some(format!("{:p}", &value as *const T));
     let grouping_hash = ctx.shared_grouping_hash.or_else(|| get_hash(&var_type_raw, name, ctx.package_name));
     let (stack_trace, caller_function) = get_stack_trace();
@@ -104,7 +108,7 @@ fn quo<T: Debug>(value: T, name: &str, ctx: QuoContext<'_>) {
 #[cfg(debug_assertions)]
 #[doc(hidden)]
 pub fn __private_quo_grouping_hash(args_key: &str, package_name: &str) -> Option<String> {
-    let (_, call_uid) = get_time();
+    let call_uid = Uuid::new_v4().to_string();
     get_hash("grouped", &format!("{args_key}:{call_uid}"), package_name)
 }
 
