@@ -97,23 +97,23 @@ QUO_PORT = "7312"
 
 # Dependency justification
 
-| Crate | Used for |
-|---|---|
-| `serde` | Serializes payload structs to JSON so they can be sent to the Quo desktop client over HTTP. |
-| `chrono` | Captures the current timestamp (date + time) at the moment a `quo!` call is made. The `wasmbind` feature enables correct time resolution in WebAssembly targets. |
-| `twox-hash` | Provides the fast, deterministic XXHash-64 algorithm used to generate the grouping hash (`var_type:name:origin`) that lets the Quo client group and diff values over time. |
-| `uuid` | Generates a random UUIDv4 that uniquely identifies each individual dump event sent to the client. |
-| `backtrace` *(optional — `stack-trace` feature)* | Captures the call stack and the immediate caller's function name at the point where `quo!` is invoked. |
-| `sysinfo` *(optional — `system-info` feature)* | Reads the current process's CPU and memory usage to include live system metrics in the payload. |
-| `ureq` *(native targets only)* | Sends the serialized payload to the Quo desktop client over HTTP. Compiled with `default-features = false` to keep the binary lean; only the `json` feature is enabled. |
-| `ehttp` *(WASM targets only)* | Performs the HTTP request from within a WebAssembly context, where `ureq` (which relies on OS threads and sockets) cannot be used. |
-| `serde-json-wasm` *(WASM targets only)* | Provides `serde_json`-compatible JSON serialization that works in `no_std` / WASM environments (the standard `serde_json` depends on `std` I/O primitives unavailable in WASM). |
-| `getrandom` v0.4 *(WASM targets only)* | Supplies the cryptographically secure random-number source that `uuid`'s v4 generator requires; the `wasm_js` feature routes entropy through the browser's `crypto.getRandomValues` API. |
-| `getrandom` v0.3 *(WASM targets only, aliased `getrandom_v3`)* | Same purpose as the v0.4 entry above, but satisfies transitive dependencies that pin to the v0.3 API. Both versions must be present because their APIs are incompatible. |
-| `wasm-bindgen-test` *(WASM dev/test only)* | Enables running Rust tests directly inside a headless browser or Node.js, which is required to verify WASM-specific code paths. |
+| Crate                                                          | Used for                                                                                                                                                                                 |
+|----------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `serde`                                                        | Serializes payload structs to JSON so they can be sent to the Quo desktop client over HTTP.                                                                                              |
+| `chrono`                                                       | Captures the current timestamp (date + time) at the moment a `quo!` call is made. The `wasmbind` feature enables correct time resolution in WebAssembly targets.                         |
+| `twox-hash`                                                    | Provides the fast, deterministic XXHash-64 algorithm used to generate the grouping hash (`var_type:name:origin`) that lets the Quo client group and diff values over time.               |
+| `uuid`                                                         | Generates a random UUIDv4 that uniquely identifies each individual dump event sent to the client.                                                                                        |
+| `backtrace` *(optional — `stack-trace` feature)*               | Captures the call stack and the immediate caller's function name at the point where `quo!` is invoked.                                                                                   |
+| `sysinfo` *(optional — `system-info` feature)*                 | Reads the current process's CPU and memory usage to include live system metrics in the payload.                                                                                          |
+| `ureq` *(native targets only)*                                 | Sends the serialized payload to the Quo desktop client over HTTP. Compiled with `default-features = false` to keep the binary lean; only the `json` feature is enabled.                  |
+| `ehttp` *(WASM targets only)*                                  | Performs the HTTP request from within a WebAssembly context, where `ureq` (which relies on OS threads and sockets) cannot be used.                                                       |
+| `serde-json-wasm` *(WASM targets only)*                        | Provides `serde_json`-compatible JSON serialization that works in `no_std` / WASM environments (the standard `serde_json` depends on `std` I/O primitives unavailable in WASM).          |
+| `getrandom` v0.4 *(WASM targets only)*                         | Supplies the cryptographically secure random-number source that `uuid`'s v4 generator requires; the `wasm_js` feature routes entropy through the browser's `crypto.getRandomValues` API. |
+| `getrandom` v0.3 *(WASM targets only, aliased `getrandom_v3`)* | Same purpose as the v0.4 entry above, but satisfies transitive dependencies that pin to the v0.3 API. Both versions must be present because their APIs are incompatible.                 |
+| `wasm-bindgen-test` *(WASM dev/test only)*                     | Enables running Rust tests directly inside a headless browser or Node.js, which is required to verify WASM-specific code paths.                                                          |
 
 ---
 ## License
 
-Quo is open-source software licensed under the [GPL-3 license](.github/LICENSE).
+Quo is open-source software licensed under the [GPL-3 license](LICENSE).
 
