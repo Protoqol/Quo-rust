@@ -30,7 +30,7 @@ To enable additional data capture, use feature flags:
 ```toml
 [dependencies]
 # Enable specific features
-quo = { version = "0.1", package = "quo-rust", features = ["stack-trace", "system-info", "hashing"] }
+quo = { version = "0.1", package = "quo-rust", features = ["stack-trace", "system-info"] }
 
 # Or enable everything
 quo = { version = "0.1", package = "quo-rust", features = ["full"] }
@@ -40,10 +40,9 @@ quo = { version = "0.1", package = "quo-rust", features = ["full"] }
 
 - `stack-trace`: Captures the call stack and the caller function name.
 - `system-info`: Captures current CPU and memory usage of the process.
-- `hashing`: Generates a reproducible grouping hash for variables (`var_type:name:origin`), allowing the Quo client to group and diff values over time.
 - `full`: Enables all the above features.
 
-Basic info like **Thread ID/Name**, **Runtime Environment** (OS/Arch), and **Memory Address** are included by default.
+Basic info like **Thread ID/Name**, **Runtime Environment** (OS/Arch), **Memory Address**, and **Grouping Hash** are included by default.
 
 ### Usage
 

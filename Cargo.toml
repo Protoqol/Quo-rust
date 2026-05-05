@@ -28,11 +28,13 @@ system-info = ["dep:sysinfo"]
 full = ["stack-trace", "system-info"]
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-wasm-bindgen-test = "0.3.68"
 ehttp = { version = "0.7.1", features = ["json"] }
 serde-json-wasm = "1.0.1"
 getrandom = { version = "0.4.2", features = ["wasm_js"] }
 getrandom_v3 = { version = "0.3", features = ["wasm_js"], package = "getrandom" }
+
+[target.'cfg(target_family = "wasm")'.dev-dependencies]
+wasm-bindgen-test = "0.3.68"
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 ureq = { version = "3", default-features = false, features = ["json"] }
