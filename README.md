@@ -1,4 +1,4 @@
-![Quo Preview](https://cms.protoqol.nl/assets/2ecc5f44-5fe5-4f15-95d6-ba365f4fcd5c)
+![Quo Preview](https://cms.protoqol.nl/assets/2ecc5f44-5fe5-4f15-95d6-ba365f4fcd5c?v1)
 
 ![Build status](https://img.shields.io/github/actions/workflow/status/Protoqol/Quo-rust/test.yml?style=flat-square&color=%23ec135b&logo=rust)
 ![docs.rs](https://img.shields.io/docsrs/quo-rust?style=flat-square&logo=docsdotrs&color=%23ec135b&link=http%3A%2F%2Fdocs.rs%2Fcrate%2Fquo-rust%2Flatest)
