@@ -85,7 +85,7 @@ You can customize the Quo server address using environment variables at compile 
 > Note: The Quo client always uses 127.0.0.1 as host, it is **not** recommended to have it set to any other host.
 
 
-You can set these in your `Cargo.toml` as follows
+You can set these in your `.cargo/config.toml` as follows
 
 ```toml 
 [env]
